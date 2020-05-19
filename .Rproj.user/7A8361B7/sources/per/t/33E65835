@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589698582472.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3122789545",
+    "id" : "33E65835",
+    "lastKnownWriteTime" : 1589825219,
+    "last_content_update" : 1589825219305,
+    "path" : "E:/Rstudio working/bayesian/prog.R",
+    "project_path" : "prog.R",
+    "properties" : {
+        "cursorPosition" : "26,64",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,2 @@
+"0"," plot(c1, subset = c(1:4), "
+"0","       col.lab = ""darkgrey"", col.axis = ""darkgrey"", col = ""darkgrey"", ask = F)"

@@ -1,0 +1,218 @@
+## Setup
+
+### Load packages
+
+```{r load-packages, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+library(BAS)
+library(gbm)
+library(e1071)
+```
+
+### Load data
+
+```{r load-data}
+
+
+load("movies.Rdata")
+attach(movies)
+```
+
+
+
+* * *
+
+## Part 1: Data
+ususall most of the movies, made ave genre Drama. Then Adventure and Action and next modt movies made are documentry type. So we will tabulate the genre of movies to check that  they have somehow the same frequency patteren.
+```{r Data}
+cbind(table(genre))
+```
+From above table we can see that the most movies seleted in the random sample are Drama, then adventure and then documnetries. so the same patteren can be seen in the genre of this sample. we will conclude here that , sample is random. Now as far as causality is concerned.  
+It is very difficult to comment on causality in observational studies. It needs more in depth knowledge of history, subject matter and some times a common sense can do the favour to talk about the causality based on empiricl analysis.Although ramdom assignment was used, so we can expect causality upto a certian level.
+
+## Part 2: Data manipulation
+
+NOTE: Insert code chunks as needed by clicking on the "Insert a new code chunk" 
+button above. Make sure that your code is visible in the project you submit. 
+Delete this note when before you submit your work.
+```{r, variables creation}
+
+feature_film= ifelse(title_type=="Feature Film",1,0)
+drama= ifelse(genre=="Drama", 1, 0)
+R_rated= ifelse(mpaa_rating=="R", 1, 0)
+oscar_season= ifelse(dvd_rel_month>9,1,0)
+summer_season= ifelse(dvd_rel_month>4&dvd_rel_month<9,1,0)
+
+movies$feature_film=factor(feature_film,c(1,0),c("yes","no"))
+movies$drama=factor(drama,c(1,0),c("yes","no"))
+movies$R_rated=factor(R_rated,c(1,0),c("yes","no"))
+movies$oscar_season=factor(oscar_season,c(1,0),c("yes","no"))
+movies$summer_season=factor(summer_season,c(1,0),c("yes","no"))
+
+
+
+movies2=select(movies,c(runtime,thtr_rel_year,drama,feature_film,R_rated,oscar_season,
+                        summer_season,imdb_rating,imdb_num_votes,critics_score,
+                        best_pic_nom,best_pic_win,best_actor_win,best_actress_win,
+                        best_dir_win,top200_box,audience_score))
+rm(drama,feature_film,oscar_season ,R_rated,summer_season)
+
+
+rm(movies)
+
+fac_var <- names(movies2)[which(sapply(movies2, is.factor))]
+
+numeric_var <- names(movies2)[which(sapply(movies2, is.numeric))]
+
+```
+
+
+* * *
+
+## Part 3: Exploratory data analysis
+First we will ave a glimpse of the data and the we will check the missing values. 
+
+
+```{r data summary}
+
+str(movies2)
+
+rowSums((apply(movies2,1,is.na)))
+cbind(rowSums((apply(movies2,1,is.na))))
+
+```
+
+We will summarize the continious and catogorical variable separately.
+```{r sum1}
+
+summary(movies2[,numeric_var])
+
+(apply(movies2[,fac_var], 2,table))
+
+
+```
+
+Plotting all the catogorical variable
+```{r factor variables}
+
+plotHist <- function(data_in, i) {
+  data <- data.frame(x=data_in[[i]])
+  p <- ggplot(data=data, aes(x=factor(x))) + stat_count() + xlab(colnames(data_in)[i]) + theme_light() + 
+    theme(axis.text.x = element_text(angle = 90, hjust =1))
+  return (p)
+}
+
+
+doPlots <- function(data_in, fun, ii, ncol=3) {
+  pp <- list()
+  for (i in ii) {
+    p <- fun(data_in=data_in, i=i)
+    pp <- c(pp, list(p))
+  }
+  do.call("grid.arrange", c(pp, ncol=ncol))
+}
+doPlots(movies2[,fac_var], fun = plotHist, ii = 1:6, ncol = 2)
+doPlots(movies2[,fac_var], fun = plotHist, ii = 7:11, ncol = 2)
+plotDen <- function(data_in, i){
+  data <- data.frame(x=data_in[[i]], audience_score = movies2$audience_score)
+  p <- ggplot(data= data) + geom_line(aes(x = x), stat = 'density', size = 1,alpha = 1.0) +
+    xlab(paste0((colnames(data_in)[i]), '\n', 'Skewness: ',round(skewness(data_in[[i]], na.rm = TRUE), 2))) + theme_light() 
+  return(p)
+  
+}
+
+doPlots(movies2[,numeric_var], fun = plotDen, ii = 1:6, ncol = 2)
+
+
+```
+
+from above we can see that there are many important variable.
+
+```{r explore}
+qplot(drama,audience_score,color=feature_film, data=movies2,geom = c("boxplot"))
+qplot(best_actor_win,audience_score,color=best_actress_win, data=movies2,geom = c("boxplot"))
+qplot(best_dir_win,audience_score,color=best_pic_win, data=movies2,geom = c("boxplot"))
+
+```
+It seem there are some potential outliers in the data. and drame and feature film seems to be important and have a postive correlation with te data.
+* * *
+
+## Part 4: Modeling
+
+```{r}
+
+library(BAS)
+
+m2= bas.lm(audience_score~., 
+                 data = movies2,
+                  initprobs = "eplogp",
+                  prior = "BIC",
+                 modelprior = uniform())
+
+
+round(summary(m2), 3)
+print(m2)
+image(m2, rotate = F)
+c1=coef(m2,estimator = "BMA")
+
+print(c1)
+```
+
+```{r}
+plot(m2, which = 1, add.smooth = F, 
+     ask = F, pch = 16, sub.caption="", caption="")
+abline(a = 0, b = 0, col = "darkgrey", lwd = 2)
+
+
+plot(m2, which = 4, ask = F, caption = "", sub.caption = "", 
+     col.in = "blue", col.ex = "darkgrey", lwd = 3)
+
+
+round(confint(c1), 4)
+
+ par(mfrow = c(2,2))
+ plot(c1, subset = c(1:4), 
+       col.lab = "darkgrey", col.axis = "darkgrey", col = "darkgrey", ask = F)
+ par(mfrow = c(2,2))
+ plot(c1, subset = c(5:8), 
+       col.lab = "darkgrey", col.axis = "darkgrey", col = "darkgrey", ask = F)
+ par(mfrow = c(2,2))
+ plot(c1, subset = c(9:12), 
+       col.lab = "darkgrey", col.axis = "darkgrey", col = "darkgrey", ask = F)
+ par(mfrow = c(2,2))
+ plot(c1, subset = c(13:15), 
+       col.lab = "darkgrey", col.axis = "darkgrey", col = "darkgrey", ask = F)
+
+```
+From above graps we can see that the two most important variables are imbd_rating and critic score. also we can see in diagnostic plots the stability of the posterior densities. We can also see in above plot only imbd_rating and critic score have non zero posterior probabity.  
+* * *
+
+## Part 5: Prediction
+
+```{r}
+library(BAS)
+m2= bas.lm(audience_score~., 
+                 data = movies2,
+                  initprobs = "eplogp",
+                  prior = "BIC",
+                 modelprior = uniform())
+new_movie = data.frame(audience_score = 90, feature_film = "yes", drama = "no", runtime=108, R_rated = "yes",thtr_rel_year = 2016, oscar_season = "no", summer_season = "no", imdb_rating = 8.0, imdb_num_votes = 871307,critics_score=85, best_pic_nom = "no", best_pic_win = "yes", best_actor_win = "yes", best_actress_win = "no", best_dir_win = "no", top200_box = "yes")
+
+prediction <- predict(m2, new_movie)
+mean(prediction$Ypred)
+
+
+```
+Audience prediction for the movie is 90 where as predicted score is 85.29. There is an error whic may be due to some more important varaibles, which are not present in the model.
+
+* * *
+
+## Part 6: Conclusion
+
+```{r}
+summary(m2)
+```
+
+From the dianostic check and the prediction, we can see that model is reasonablly fitted. It can be further improve but model is lot better then  ols estimated model.

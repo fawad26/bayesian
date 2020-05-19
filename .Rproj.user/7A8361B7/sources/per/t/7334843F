@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589279045691.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1885770881",
+    "id" : "7334843F",
+    "lastKnownWriteTime" : 1589228997,
+    "last_content_update" : 1589228997,
+    "path" : "E:/Rstudio working/bayesian/bayesian_project_rubric.Rmd",
+    "project_path" : "bayesian_project_rubric.Rmd",
+    "properties" : {
+        "cursorPosition" : "96,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

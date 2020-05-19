@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589279323075.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3735138442",
+    "id" : "7F1F4E0B",
+    "lastKnownWriteTime" : 1589825216,
+    "last_content_update" : 1589825216302,
+    "path" : "E:/Rstudio working/bayesian/all_models_bayes_reg.R",
+    "project_path" : "all_models_bayes_reg.R",
+    "properties" : {
+        "cursorPosition" : "129,3",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

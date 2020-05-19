@@ -1,0 +1,2 @@
+"0","qplot(best_dir_win,audience_score,color=best_pic_win, data=movies2,geom = c(""boxplot""))"
+"0",""
